@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <meta name="description" content="StudyAssists Generate Quiz - Upload and access study notebooks to enhance learning.">
+      <meta name="author" content="StudyAssists">
+      <meta name="keywords" content="StudyAssists, study notes, online notebooks, learning resources, student tools">
+      <meta name="googlebot" content="index, follow">
+      <meta name="robots" content="index, follow">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>StudyAssists | Generate-Quiz </title>
+
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/generate.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/font-awesome.min.css') }}" />
+
+
+    <style>
+
+      #quizList {
+
+        border-radius: 0.75rem;
+        border: 1px solid white;
+        padding: 1.5rem;
+        box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
+        margin: 0px 0px 10px 0px;
+      }
+
+      .list-group-item {
+        border: none;
+        border-bottom: 1px solid #eee;
+        padding: 1rem 0;
+      }
+
+      .list-group-item:last-child  {
+        border-bottom: none;
+      }
+
+
+      .fw-semibold {
+        font-weight: 600;
+      }
+
+      .form-check {
+        margin-top: 0.5rem;
+      }
+
+      .badge {
+        border-radius: 0.5rem;
+        font-size: 0.85rem;
+      }
+
+    </style>
+  </head>
+  <body>
+    <header id="header" class="header-section">
+            <div class="header-container">
+                <nav class="navbar">
+                    <a class="brand" href="index.html" aria-label="Study Assist home">
+                        <svg class="brand-icon" width="36" height="36" viewBox="0 0 24 24" aria-hidden="true">
+                        <path fill="#22c1ff" d="M2 7l10-5 10 5v2l-10 5L2 9z"></path>
+                        <path fill="#0ea5a4" d="M2 12l10-5 10 5v2l-10 5L2 14z" opacity="0.15"></path>
+                        </svg>
+                        <span class="brand-text">StudyAssists</span>
+                    </a>
+                    <div class="d-flex menu-wrap">
+                       <div id="navmenu" class="mainmenu">
+                           <ul class="nav">
+                                <li ><a  class="active" href="index.html">Home <span class="sr-only">(current)</span></a></li>
+                                <li><a  class="" href="generate.html">Upload Notebook</a></li>
+                                <li><a  class="" href="#">About</a></li>
+                            </ul>
+                            
+                       </div>
+                    </div>
+                </nav>
+            </div>
+		</header>
+    
+    <div class="container">
+      <!-- Sidebar -->
+      <div class="sidebar" id="sidebar">
+        <div class="toggle-btn" id="toggleBtn">
+          <i class="fa fa-angle-double-left"></i>
+        </div>
+
+        <div class="sidebar-main-content">
+          <div class="sidebar-content">
+            <h2>Upload Files</h2>
+
+            <!-- Upload document section -->
+            <form method="post" enctype="multipart/form-data">
+              <div class="upload-box" id="uploadBox">
+                <i class="fa fa-cloud-upload upload-icon"></i>
+                <p class="drag-text">Drag and Drop files to upload<br />or</p>
+                <div class="custom-file-input-wrapper">
+                      <button id="browseBtn" type="button" class="custom-upload-button">
+                        Browse
+                      </button>
+
+                  <!-- Fall back for uploaded files display function-->
+                  <!-- <div id="fileStatus" class="mt-2 text-muted"></div> -->
+
+                  <input type="file" id="fileInput"  name="file" accept=".pdf,.docx,.txt" hidden />
+                </div>
+                <p class="small-text">Supported files: PDF, DOCX, TXT</p>
+              </div>
+
+            <h3>Uploaded files</h3>
+            <ul id="fileList"></ul>
+            <button id="uploadBtn" class="btn btn-primary mt-3 w-100" type="submit"> Upload </button>
+            <button type="submit" formaction="{{ url_for('home') }}" class="btn btn-outline-secondary flex-fill">
+            Reset
+            </button>
+            </form>
+
+            </form>
+          </div>
+
+
+        </div>
+        <div class="upload-icon-collapsed">
+          <i class="fa fa-cloud-upload"></i>
+        </div>
+
+        <div class="sidebar-nav-bottom">
+          <a href="index.html" class="nav-link">
+            <i class="fa fa-home"></i> <span>Home</span>
+          </a>
+          <a href="generate.html" class="nav-link">
+            <i class="fa fa-lightbulb-o"></i> <span> Generate-Quiz </span>
+          </a>
+          <a href="about.html" class="nav-link">
+            <i class="fa fa-info-circle"></i> <span>About</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Main Content --> 
+      <div class="main">
+        <div class="mobile-header">
+          <div class="logo-text">
+            <a class="brand" href="/index.html" aria-label="StudyAssists home">
+              <svg
+                class="brand-icon"
+                width="36"
+                height="36"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path fill="#22c1ff" d="M2 7l10-5 10 5v2l-10 5L2 9z"></path>
+                <path
+                  fill="#0ea5a4"
+                  d="M2 12l10-5 10 5v2l-10 5L2 14z"
+                  opacity="0.15"
+                ></path>
+              </svg>
+              <span class="brand-text">StudyAssists</span>
+            </a>
+          </div>
+
+          <div class="mobile-toggle" id="mobileToggle">
+            <i class="fa fa-bars"></i>
+          </div>
+        </div>
+
+        <div class="main-section">
+
+         
+          <!-- Flash messages -->
+          <div class="mt-3">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+          </div>
+
+
+
+
+          <div class="progress">
+            <div class="progress-bar">
+              <div class="progress-fill"></div>
+            </div>
+            <label
+              >Generating summary with AI...
+              <span id="filling">(80%)</span></label
+            >
+          </div>
+
+            <!-- 
+            <h2>Notebook Summary</h2>
+            <p><strong>Title:</strong> Study Guide for Successful Learning</p> 
+            <p>
+              This notebook serves as a comprehensive guide to enhance learning
+              effectiveness through various strategies. It emphasizes the
+              importance of understanding personal motivation, learning styles,
+              and the need for organization in study habits.
+            </p>
+
+            -->
+
+            <section class="card">
+              {% if summary %}
+                <h2 class="mt-4 fw-semibold">Summary</h2>
+                <div class="border rounded p-3 bg-light monospace">
+                  {{ summary }}
+                </div>
+            {% endif %}
+            </section>
+
+
+
+          <section class="card">
+            <h2>Ask a Question from your Book</h2>
+
+            <!-- Accessible label for screen readers -->
+            <label for="questionInput" class="visually-hidden"></label>
+
+            <!-- Text area for question input -->
+            <textarea
+              id="questionInput"
+              class="question-input"
+              placeholder="Enter your question..."
+              rows="3"
+            ></textarea>
+
+   
+            {% if answer %}
+              <div id="answerBox" class="mt-3">
+                <div class="border rounded p-3 bg-light monospace" id="answerText" style="white-space: pre-wrap;">
+                  {{ answer }}
+                </div>
+              </div>
+            {% endif %}
+
+
+
+            <!-- Actions -->
+            <div class="mt-3 d-flex align-items-center gap-2">
+              <button id="askBtn" type="button" class="mybutton">Submit</button>
+              <small id="opStatus" class="text-muted" aria-live="polite" role="status"></small>
+            </div>
+            {% if answer %}
+              <div id="answerBox" class="mt-3">
+                <div class="border rounded p-3 bg-light monospace" id="answerText" style="white-space: pre-wrap;">
+                  {{ answer }}
+                </div>
+              </div>
+            {% endif %}
+
+
+
+
+        </section>
+
+
+          <section class="card">
+            <h2>Generate Quiz Questions</h2>
+            <label  class="slider-label" for="quizRange">Select the number of quiz questions:</label>
+            <div class="range-wrapper">
+              <span id="rangeValue">5</span>
+
+              <div class="range-container">
+                <input
+                  type="range"
+                  id="quizRange"
+                  min="1"
+                  max="100"
+                  value="5"
+                />
+
+                <div class="range-labels">
+                  <span>1</span>
+                  <span>100</span>
+                </div>
+              </div>
+            </div>
+
+            <button
+              id="generateBtn"
+              type="button"
+              style="margin-top: 10px"
+              class="btn btn-primary mybutton"
+            >
+              Generate Questions
+            </button>
+
+
+            <!-- Status line under the Generate button -->
+            <small id="quizStatus" class="text-muted d-block mt-2" aria-live="polite" role="status"></small>
+
+            <!-- Quiz results area -->
+            <div id="quizBox" class="mt-3" style="display:none;">
+              <h3>Quiz</h3>
+
+              <!-- The JS will render radio choices here -->
+              <div id="quizList" class="list-group"></div>
+
+              <!-- Submit + results -->
+              <button id="submitQuizBtn" type="button" class="btn btn-primary mt-3">Submit Answers</button>
+              <div id="quizResults" class="mt-2" aria-live="polite" role="status"></div>
+
+              <!-- Export controls will be injected here by JS -->
+              <div id="export-options" class="mt-3"></div>
+            </div>
+
+          </section>
+        </div>
+        <footer>© 2025 StudyAssists | All rights reserved</footer>
+      </div>
+    </div>
+
+    		<a data-scroll href="#header" id="scroll-to-top"><i class="arrow_carrot-up"></i></a>
+
+
+
+    <script defer src="{{ url_for('static', filename='js/vendor/jquery-1.12.4.min.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='js/vendor/bootstrap.min.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='js/vendor/jquery.slicknav.min.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='js/final.js') }}"></script>
+    <!-- jsPDF for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- PapaParse for CSV export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  </body>
+</html>
